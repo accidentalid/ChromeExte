@@ -1,0 +1,75 @@
+{
+  "manifest_version": 3,
+  "name": "Vibe 翻译",
+  "version": "1.0.0",
+  "description": "智能网页翻译插件 - 支持划词翻译与全页双语对照，接入多家主流 AI 大模型",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    },
+    "default_title": "Vibe 翻译"
+  },
+  "options_page": "options/options.html",
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["content/content.css"],
+      "js": [
+        "shared/constants.js",
+        "shared/language-list.js",
+        "shared/utils.js",
+        "shared/message-bus.js",
+        "shared/i18n.js",
+        "content/text-extractor.js",
+        "content/dom-injector.js",
+        "content/style-manager.js",
+        "content/selection-handler.js",
+        "content/page-translator.js",
+        "content/floating-bubble.js",
+        "content/selection-bubble.js",
+        "content/content-main.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "commands": {
+    "translate-selection": {
+      "suggested_key": {
+        "default": "Alt+T"
+      },
+      "description": "翻译选中文本"
+    },
+    "translate-page": {
+      "suggested_key": {
+        "default": "Alt+P"
+      },
+      "description": "翻译整个页面"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*", "styles/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe 翻译 - 设置</title>
+  <link rel="stylesheet" href="../styles/md-theme.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-wrapper">
+    <!-- 顶栏 -->
+    <header class="options-header">
+      <div class="header-left">
+        <img src="../icons/icon48.png" alt="Vibe" class="header-icon">
+        <div>
+          <h1 class="header-title">Vibe 翻译</h1>
+          <p class="header-subtitle">设置</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- 标签栏 -->
+    <nav class="md-tabs" role="tablist">
+      <button class="md-tab" role="tab" aria-selected="true" data-tab="api">翻译服务</button>
+      <button class="md-tab" role="tab" aria-selected="false" data-tab="display">显示设置</button>
+      <button class="md-tab" role="tab" aria-selected="false" data-tab="prompts">提示词管理</button>
+      <button class="md-tab" role="tab" aria-selected="false" data-tab="shortcuts">快捷键</button>
+      <button class="md-tab" role="tab" aria-selected="false" data-tab="advanced">高级设置</button>
+    </nav>
+
+    <!-- Panel: 翻译服务 -->
+    <div class="md-tab-panel" id="panel-api" role="tabpanel">
+      <div class="section-title">选择翻译服务商</div>
+      <div class="md-radio-cards" id="provider-cards"></div>
+
+      <div class="md-divider mt-24"></div>
+
+      <div id="provider-config" class="provider-config">
+        <div class="section-title" id="provider-config-title">服务商配置</div>
+        <p class="provider-hint section-desc" id="provider-hint"></p>
+
+        <div class="md-field">
+          <input type="url" id="cfg-base-url" placeholder=" ">
+          <label>接口地址 (Base URL)</label>
+        </div>
+
+        <div class="md-field md-field--password">
+          <input type="password" id="cfg-api-key" placeholder=" " autocomplete="off">
+          <label>API 密钥</label>
+          <button class="md-toggle-password" type="button" id="btn-toggle-key" aria-label="显示密钥">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="md-field">
+          <select id="cfg-model"><option value="">请选择模型</option></select>
+          <label>模型</label>
+        </div>
+
+        <div class="md-field">
+          <input type="text" id="cfg-custom-model" placeholder=" ">
+          <label>自定义模型名称 (可选)</label>
+          <div class="md-helper">填写后将覆盖上方选择的模型</div>
+        </div>
+
+        <button class="md-btn md-btn--outlined" id="btn-test">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          测试连接
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel: 显示设置 -->
+    <div class="md-tab-panel" id="panel-display" role="tabpanel" hidden>
+      <div class="section-title">默认显示模式</div>
+      <div class="md-chip-group mb-16">
+        <button class="md-chip" data-display-mode="bilingual">双语对照</button>
+        <button class="md-chip" data-display-mode="target-only">仅译文</button>
+      </div>
+
+      <div class="section-title mt-24">译文样式</div>
+      <div class="style-options md-card">
+        <label class="md-checkbox mb-16">
+          <input type="checkbox" id="style-bold">
+          <span class="check-box"></span>
+          <span>加粗</span>
+        </label>
+        <label class="md-checkbox mb-16">
+          <input type="checkbox" id="style-underline">
+          <span class="check-box"></span>
+          <span>下划线</span>
+        </label>
+
+        <div class="flex-row gap-16 mb-16">
+          <span class="text-md">文字颜色</span>
+          <div class="md-color-input">
+            <input type="color" id="style-color" value="#666666">
+            <span class="md-color-value" id="style-color-value">#666666</span>
+          </div>
+        </div>
+
+        <div class="flex-row gap-16 mb-16">
+          <span class="text-md">背景色</span>
+          <div class="md-color-input">
+            <input type="color" id="style-bg-color" value="#FFFFFF">
+            <span class="md-color-value" id="style-bg-color-value">无</span>
+          </div>
+          <button class="md-btn md-btn--small" id="btn-clear-bg">清除</button>
+        </div>
+
+        <div class="flex-row gap-16 mb-16">
+          <span class="text-md">字体大小</span>
+          <div class="md-chip-group">
+            <button class="md-chip md-chip--selected" data-font-size="same">与原文相同</button>
+            <button class="md-chip" data-font-size="smaller">稍小</button>
+            <button class="md-chip" data-font-size="larger">稍大</button>
+          </div>
+        </div>
+
+        <div class="flex-row gap-16">
+          <span class="text-md">分隔线</span>
+          <div class="md-chip-group">
+            <button class="md-chip" data-separator="none">无</button>
+            <button class="md-chip md-chip--selected" data-separator="dashed">虚线</button>
+            <button class="md-chip" data-separator="solid">实线</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title mt-24">悬浮翻译按钮</div>
+      <label class="md-switch">
+        <span>启用悬浮翻译按钮</span>
+        <input type="checkbox" id="bubble-enabled" checked>
+        <span class="track"><span class="thumb"></span></span>
+      </label>
+    </div>
+
+    <!-- Panel: 提示词管理 -->
+    <div class="md-tab-panel" id="panel-prompts" role="tabpanel" hidden>
+      <div class="section-title">系统提示词 (System Prompt)</div>
+      <div class="section-desc">定义 AI 翻译引擎的行为。支持变量: {source_lang}, {target_lang}, {domain}</div>
+      <div class="md-field">
+        <textarea id="prompt-system" rows="8" placeholder=" "></textarea>
+        <label>System Prompt</label>
+      </div>
+      <button class="md-btn md-btn--small mb-16" id="btn-reset-system">恢复默认</button>
+
+      <div class="md-divider"></div>
+
+      <div class="section-title mt-16">用户提示词 (User Prompt)</div>
+      <div class="section-desc">定义发送给 AI 的用户消息模板。必须包含 {text} 变量。</div>
+      <div class="md-field">
+        <textarea id="prompt-user" rows="4" placeholder=" "></textarea>
+        <label>User Prompt</label>
+      </div>
+      <button class="md-btn md-btn--small mb-16" id="btn-reset-user">恢复默认</button>
+
+      <div class="md-collapse mt-16">
+        <div class="md-collapse-header" onclick="this.parentElement.toggleAttribute('open')">
+          <span>可用变量说明</span>
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div class="md-collapse-body">
+          <table class="var-table">
+            <tr><td><code>{source_lang}</code></td><td>源语言名称（如"English"）</td></tr>
+            <tr><td><code>{target_lang}</code></td><td>目标语言名称（如"简体中文"）</td></tr>
+            <tr><td><code>{text}</code></td><td>待翻译的文本内容</td></tr>
+            <tr><td><code>{domain}</code></td><td>当前网站域名</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel: 快捷键 -->
+    <div class="md-tab-panel" id="panel-shortcuts" role="tabpanel" hidden>
+      <div class="section-title">键盘快捷键</div>
+      <div class="section-desc">通过 Chrome 扩展快捷键设置修改全局快捷键。</div>
+
+      <div class="shortcut-list md-card">
+        <div class="shortcut-item">
+          <span class="shortcut-label">划词翻译</span>
+          <kbd class="shortcut-key" id="key-selection">Alt+T</kbd>
+        </div>
+        <div class="md-divider"></div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">全页翻译</span>
+          <kbd class="shortcut-key" id="key-page">Alt+P</kbd>
+        </div>
+      </div>
+
+      <div class="section-desc mt-16">
+        如需修改快捷键，请前往 <a href="#" id="link-shortcuts">Chrome 扩展快捷键设置</a>
+      </div>
+    </div>
+
+    <!-- Panel: 高级设置 -->
+    <div class="md-tab-panel" id="panel-advanced" role="tabpanel" hidden>
+      <div class="section-title">并发控制</div>
+      <div class="md-slider mb-16">
+        <span class="text-md">最大并发数</span>
+        <input type="range" id="cfg-concurrency" min="1" max="10" value="3">
+        <span class="md-slider-value" id="concurrency-value">3</span>
+      </div>
+
+      <div class="section-title mt-24">请求超时</div>
+      <div class="md-slider mb-16">
+        <span class="text-md">超时时间 (秒)</span>
+        <input type="range" id="cfg-timeout" min="10" max="120" value="30" step="5">
+        <span class="md-slider-value" id="timeout-value">30s</span>
+      </div>
+
+      <div class="md-divider"></div>
+
+      <div class="section-title mt-16">缓存设置</div>
+      <label class="md-switch mb-16">
+        <span>启用翻译缓存</span>
+        <input type="checkbox" id="cache-enabled" checked>
+        <span class="track"><span class="thumb"></span></span>
+      </label>
+
+      <div class="md-slider mb-16">
+        <span class="text-md">有效期 (小时)</span>
+        <input type="range" id="cache-ttl" min="1" max="720" value="72" step="1">
+        <span class="md-slider-value" id="cache-ttl-value">72h</span>
+      </div>
+
+      <div class="md-slider mb-16">
+        <span class="text-md">最大容量 (MB)</span>
+        <input type="range" id="cache-max-size" min="10" max="200" value="50" step="10">
+        <span class="md-slider-value" id="cache-max-value">50MB</span>
+      </div>
+
+      <div class="flex-row gap-16 mb-16">
+        <span class="text-md text-secondary" id="cache-stats">缓存大小: 加载中...</span>
+        <button class="md-btn md-btn--small md-btn--outlined" id="btn-clear-cache">清除缓存</button>
+      </div>
+
+      <div class="md-divider mt-24"></div>
+
+      <div class="section-title mt-16">配置导入/导出</div>
+      <div class="flex-row gap-12">
+        <button class="md-btn md-btn--outlined" id="btn-export">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          导出配置
+        </button>
+        <button class="md-btn md-btn--outlined" id="btn-import">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+          导入配置
+        </button>
+        <input type="file" id="import-file" accept=".json" style="display:none">
+      </div>
+    </div>
+
+    <!-- Snackbar -->
+    <div class="md-snackbar" id="snackbar">
+      <span id="snackbar-text"></span>
+    </div>
+  </div>
+
+  <script src="../shared/constants.js"></script>
+  <script src="../shared/language-list.js"></script>
+  <script src="../shared/utils.js"></script>
+  <script src="../shared/message-bus.js"></script>
+  <script src="../shared/i18n.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

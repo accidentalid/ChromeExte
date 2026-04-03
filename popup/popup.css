@@ -1,0 +1,371 @@
+/* ============================================
+   Popup Styles
+   ============================================ */
+
+body {
+  width: 380px;
+  min-height: 420px;
+  max-height: 580px;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* ============================================
+   View Switching
+   ============================================ */
+.popup-views {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.popup-view {
+  display: none;
+}
+
+.popup-view--active {
+  display: block;
+}
+
+/* ============================================
+   Main View
+   ============================================ */
+
+/* Header */
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--md-outline-variant);
+  background: var(--md-surface);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.header-title {
+  font: var(--md-font-title-md);
+  color: var(--md-on-surface);
+}
+
+/* Status Card */
+.status-card {
+  margin: 12px 16px 0;
+  padding: 12px 16px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--md-outline);
+  flex-shrink: 0;
+  transition: background 200ms;
+}
+
+.status-dot--translating {
+  background: var(--md-warning);
+  animation: status-pulse 1s ease-in-out infinite;
+}
+
+.status-dot--done {
+  background: var(--md-success);
+}
+
+.status-dot--error {
+  background: var(--md-error);
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.status-text {
+  font: var(--md-font-body-sm);
+  color: var(--md-on-surface-variant);
+}
+
+/* Language Card */
+.lang-card {
+  margin: 12px 16px 0;
+  padding: 16px;
+}
+
+.lang-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-select {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.lang-select select {
+  padding: 10px 32px 10px 12px;
+  font: var(--md-font-body-md);
+  height: 44px;
+}
+
+.lang-select label {
+  font: var(--md-font-body-sm);
+  top: 0;
+  transform: translateY(-50%);
+  color: var(--md-primary);
+}
+
+.swap-btn {
+  flex-shrink: 0;
+  margin-top: 0;
+  transition: transform 200ms var(--md-motion-standard);
+}
+
+.swap-btn:active {
+  transform: rotate(180deg);
+}
+
+/* Mode Card */
+.mode-card {
+  margin: 12px 16px 0;
+  padding: 12px 16px;
+}
+
+.mode-label {
+  font: var(--md-font-label-lg);
+  color: var(--md-on-surface);
+}
+
+/* Action Section */
+.action-section {
+  padding: 16px;
+}
+
+.translate-btn {
+  height: 48px;
+  font-size: 15px;
+  gap: 10px;
+  border-radius: var(--md-shape-md);
+}
+
+.translate-btn--stop {
+  background: var(--md-error);
+}
+
+.translate-btn--stop:hover {
+  background: #C62828;
+}
+
+/* Quick Section */
+.quick-section {
+  padding: 0 16px 12px;
+}
+
+.quick-section .md-switch {
+  width: 100%;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.switch-label {
+  font: var(--md-font-body-md);
+  color: var(--md-on-surface);
+}
+
+/* Footer */
+.popup-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--md-outline-variant);
+}
+
+/* ============================================
+   Settings View
+   ============================================ */
+
+/* Settings Tabs */
+.settings-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--md-outline-variant);
+  background: var(--md-surface);
+  padding: 0;
+  gap: 0;
+}
+
+.settings-tab {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: none;
+  font: var(--md-font-label-md);
+  color: var(--md-on-surface-variant);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 150ms, border-color 150ms;
+  text-align: center;
+}
+
+.settings-tab:hover {
+  color: var(--md-on-surface);
+  background: rgba(0,0,0,0.04);
+}
+
+.settings-tab--active {
+  color: var(--md-primary);
+  border-bottom-color: var(--md-primary);
+}
+
+/* Settings Content Scroll */
+.settings-scroll {
+  max-height: 460px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.settings-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.settings-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.settings-scroll::-webkit-scrollbar-thumb {
+  background: #CCC;
+  border-radius: 2px;
+}
+
+/* Settings Panel */
+.settings-panel {
+  padding: 16px;
+}
+
+.sp-title {
+  font: var(--md-font-label-lg);
+  color: var(--md-on-surface);
+  margin-bottom: 10px;
+}
+
+.sp-hint {
+  font: var(--md-font-body-sm);
+  color: var(--md-on-surface-variant);
+  margin: 0 0 10px;
+}
+
+.sp-divider {
+  height: 1px;
+  background: var(--md-outline-variant);
+  margin: 14px 0;
+}
+
+/* Provider Cards (Compact) */
+.sp-providers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.sp-providers .md-radio-card {
+  padding: 8px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  text-align: center;
+  min-height: auto;
+}
+
+.sp-providers .md-radio-card .radio-label {
+  font-size: 11px;
+  display: block;
+  line-height: 1.3;
+}
+
+.sp-providers .md-radio-card .radio-dot {
+  margin: 0 auto 4px;
+}
+
+/* Settings Row */
+.sp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font: var(--md-font-body-sm);
+  color: var(--md-on-surface);
+}
+
+.sp-btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+.sp-half-btn {
+  flex: 1;
+}
+
+/* Compact field adjustments */
+.settings-panel .md-field {
+  margin-bottom: 12px;
+}
+
+.settings-panel .md-field input,
+.settings-panel .md-field select,
+.settings-panel .md-field textarea {
+  font-size: 13px;
+}
+
+.settings-panel .md-slider {
+  font: var(--md-font-body-sm);
+}
+
+.settings-panel .md-switch {
+  font: var(--md-font-body-sm);
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Settings Snackbar */
+.sp-snackbar {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--md-inverse-surface, #333);
+  color: var(--md-inverse-on-surface, #FFF);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font: var(--md-font-body-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
+  z-index: 100;
+  white-space: nowrap;
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-snackbar--visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Margin helpers */
+.mb-12 { margin-bottom: 12px; }

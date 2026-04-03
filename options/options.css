@@ -1,0 +1,180 @@
+/* ============================================
+   Options Page Styles
+   ============================================ */
+
+body {
+  background: var(--md-surface-dim);
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+
+.options-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--md-surface);
+  min-height: 100vh;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+/* Header */
+.options-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--md-outline-variant);
+  background: var(--md-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.header-title {
+  font: var(--md-font-title-lg);
+  color: var(--md-on-surface);
+  margin: 0;
+}
+
+.header-subtitle {
+  font: var(--md-font-body-sm);
+  color: var(--md-on-surface-variant);
+  margin: 2px 0 0;
+}
+
+/* Tabs */
+.options-wrapper .md-tabs {
+  padding: 0 32px;
+  background: var(--md-surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.options-wrapper .md-tab {
+  flex: 0 0 auto;
+  padding: 0 20px;
+}
+
+/* Tab Panels */
+.md-tab-panel {
+  padding: 24px 32px;
+}
+
+/* Provider Cards */
+.md-radio-cards {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+.md-radio-card .radio-label {
+  font-size: 13px;
+}
+
+/* Provider Config */
+.provider-config {
+  margin-top: 24px;
+}
+
+.provider-hint {
+  margin-bottom: 16px;
+}
+
+/* Style Options Card */
+.style-options {
+  padding: 20px;
+}
+
+.var-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.var-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--md-outline-variant);
+  font: var(--md-font-body-md);
+}
+
+.var-table td:first-child {
+  width: 140px;
+  font-family: monospace;
+  color: var(--md-primary);
+}
+
+/* Shortcut list */
+.shortcut-list {
+  padding: 0;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.shortcut-label {
+  font: var(--md-font-body-md);
+  color: var(--md-on-surface);
+}
+
+.shortcut-key {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--md-surface-dim);
+  border: 1px solid var(--md-outline-variant);
+  border-radius: var(--md-shape-xs);
+  font: var(--md-font-label-md);
+  color: var(--md-on-surface);
+  font-family: monospace;
+}
+
+/* Slider adjustments */
+.md-slider {
+  flex-wrap: nowrap;
+}
+
+.md-slider .text-md {
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+/* Links */
+a {
+  color: var(--md-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .options-header {
+    padding: 16px;
+  }
+
+  .md-tab-panel {
+    padding: 16px;
+  }
+
+  .options-wrapper .md-tabs {
+    padding: 0 16px;
+  }
+
+  .md-radio-cards {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+}

@@ -1,0 +1,55 @@
+/* ============================================
+   Vibe Translation - Content Script CSS
+   双语块样式（非 Shadow DOM 部分）
+   ============================================ */
+
+/* 翻译块基础样式 */
+.vt-trans {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif !important;
+  color: #666666 !important;
+  line-height: 1.6 !important;
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+  border-top: 1px dashed #E0E0E0 !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  opacity: 0;
+  animation: vt-fade-in 300ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 仅译文模式 */
+.vt-mode-target-only [data-vt-id] {
+  display: none !important;
+}
+
+.vt-mode-target-only .vt-trans {
+  border-top: none !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  text-decoration: inherit !important;
+  background-color: transparent !important;
+  font-family: inherit !important;
+}
+
+/* display:contents wrapper */
+[data-vt-wrapper] {
+  display: contents !important;
+}
