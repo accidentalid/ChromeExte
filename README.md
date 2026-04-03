@@ -82,8 +82,7 @@ vibe-translation-extension/
 
 ```bash
 # 克隆项目
-git clone https://github.com/yourusername/vibe-translation-extension.git
-
+git clone https://github.com/accidentalid/ChromeExte.git
 # 在 Chrome 中加载扩展进行开发调试
 # chrome://extensions/ → 开发者模式 → 加载已解压的扩展程序
 ```
