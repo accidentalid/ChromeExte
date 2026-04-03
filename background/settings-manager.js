@@ -46,6 +46,12 @@ const DEFAULT_SETTINGS = {
     timeout: 30,
     cache: { enabled: true, ttlHours: 72, maxSizeMB: 50 },
   },
+  tts: {
+    enabled: true,
+    rate: 1.0,
+    pitch: 1.0,
+    voiceURI: '',
+  },
   floatingBubble: { enabled: true, position: { right: 24, bottom: 80 } },
   selectionTranslateEnabled: true,
   version: 1,

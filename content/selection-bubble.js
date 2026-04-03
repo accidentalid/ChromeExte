@@ -9,6 +9,7 @@ const VT_SELECTION_BUBBLE = {
   currentText: '',
   boundingRect: null, // 选区整体 bounding rect
   settings: null,
+  _drag: { active: false, startX: 0, startY: 0, origTop: 0, origLeft: 0, moved: false },
 
   /**
    * 初始化
@@ -195,6 +196,12 @@ const VT_SELECTION_BUBBLE = {
     this.state = 'result';
     const cachedBadge = cached ? '<span class="vt-badge">已缓存</span>' : '';
 
+    const ttsSupported = typeof VT_TTS_MANAGER !== 'undefined' && VT_TTS_MANAGER.isSupported() && VT_TTS_MANAGER.settings.enabled;
+    const speakBtn = ttsSupported ? `
+          <button class="vt-speak-btn" aria-label="朗读原文" title="朗读原文">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          </button>` : '';
+
     this.container.innerHTML = `
       <div class="vt-card" style="pointer-events:auto;">
         <div class="vt-card-header">
@@ -203,7 +210,10 @@ const VT_SELECTION_BUBBLE = {
         </div>
         <div class="vt-card-body">
           <div class="vt-source-section">
-            <div class="vt-section-label">原文</div>
+            <div class="vt-section-label-row">
+              <div class="vt-section-label">原文</div>
+              ${speakBtn}
+            </div>
             <div class="vt-source-text">${this._escapeHtml(this.currentText)}</div>
           </div>
           <div class="vt-divider"></div>
@@ -213,6 +223,9 @@ const VT_SELECTION_BUBBLE = {
           </div>
         </div>
         <div class="vt-card-footer">
+          <button class="vt-speak-btn vt-speak-btn--footer" aria-label="朗读原文" title="朗读原文" ${!ttsSupported ? 'style="display:none"' : ''}>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          </button>
           <button class="vt-copy-btn">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
             复制译文
@@ -239,8 +252,34 @@ const VT_SELECTION_BUBBLE = {
       } catch {}
     });
 
+    // 绑定朗读按钮
+    const self = this;
+    this.container.querySelectorAll('.vt-speak-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (typeof VT_TTS_MANAGER !== 'undefined') {
+          if (VT_TTS_MANAGER.speaking) {
+            VT_TTS_MANAGER.stop();
+            self.container.querySelectorAll('.vt-speak-btn').forEach(b => b.classList.remove('vt-speak-btn--active'));
+          } else {
+            VT_TTS_MANAGER.speak(self.currentText);
+            self.container.querySelectorAll('.vt-speak-btn').forEach(b => b.classList.add('vt-speak-btn--active'));
+            const checkEnd = setInterval(() => {
+              if (!VT_TTS_MANAGER.speaking) {
+                self.container.querySelectorAll('.vt-speak-btn').forEach(b => b.classList.remove('vt-speak-btn--active'));
+                clearInterval(checkEnd);
+              }
+            }, 200);
+          }
+        }
+      });
+    });
+
     // 关闭按钮
     this.container.querySelector('.vt-close-btn').addEventListener('click', () => this.hide());
+
+    // 拖拽
+    this._bindDrag();
   },
 
   /**
@@ -271,6 +310,51 @@ const VT_SELECTION_BUBBLE = {
     if (rb) {
       rb.addEventListener('click', () => location.reload());
     }
+
+    // 拖拽
+    this._bindDrag();
+  },
+
+  /**
+   * 给卡片 header 绑定拖拽
+   */
+  _bindDrag() {
+    const header = this.container.querySelector('.vt-card-header');
+    if (!header) return;
+
+    header.style.cursor = 'grab';
+
+    header.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.vt-close-btn')) return;
+
+      e.preventDefault();
+      this._drag.active = true;
+      this._drag.moved = false;
+      this._drag.startX = e.clientX;
+      this._drag.startY = e.clientY;
+      this._drag.origTop = parseFloat(this.container.style.top) || 0;
+      this._drag.origLeft = parseFloat(this.container.style.left) || 0;
+      header.style.cursor = 'grabbing';
+      header.setPointerCapture(e.pointerId);
+    });
+
+    header.addEventListener('pointermove', (e) => {
+      if (!this._drag.active) return;
+      const dx = e.clientX - this._drag.startX;
+      const dy = e.clientY - this._drag.startY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        this._drag.moved = true;
+      }
+      this.container.style.top = (this._drag.origTop + dy) + 'px';
+      this.container.style.left = (this._drag.origLeft + dx) + 'px';
+      this.container.style.transition = 'none';
+    });
+
+    header.addEventListener('pointerup', () => {
+      this._drag.active = false;
+      header.style.cursor = 'grab';
+      this.container.style.transition = '';
+    });
   },
 
   /**
@@ -344,6 +428,12 @@ const VT_SELECTION_BUBBLE = {
         justify-content: space-between;
         padding: 12px 16px;
         border-bottom: 1px solid #F0F0F0;
+        cursor: grab;
+        user-select: none;
+      }
+
+      .vt-card-header:active {
+        cursor: grabbing;
       }
 
       .vt-card-title {
@@ -448,6 +538,8 @@ const VT_SELECTION_BUBBLE = {
         border-top: 1px solid #F0F0F0;
         display: flex;
         justify-content: flex-end;
+        align-items: center;
+        gap: 4px;
       }
 
       .vt-copy-btn {
@@ -463,10 +555,77 @@ const VT_SELECTION_BUBBLE = {
         border-radius: 4px;
         transition: background 150ms;
         font-family: inherit;
+        white-space: nowrap;
       }
 
       .vt-copy-btn:hover {
         background: rgba(21, 101, 192, 0.08);
+      }
+
+      .vt-speak-btn--footer {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: none;
+        color: #1565C0;
+        cursor: pointer;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        flex-shrink: 0;
+        transition: background 150ms, color 150ms;
+      }
+
+      .vt-speak-btn--footer:hover {
+        background: rgba(21, 101, 192, 0.1);
+      }
+
+      .vt-speak-btn--footer.vt-speak-btn--active {
+        color: #E65100;
+        animation: vt-speak-pulse 1s ease-in-out infinite;
+      }
+
+      .vt-section-label-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+
+      .vt-section-label-row .vt-section-label {
+        margin-bottom: 0;
+      }
+
+      .vt-speak-btn {
+        width: 22px;
+        height: 22px;
+        border: none;
+        background: none;
+        color: #1565C0;
+        cursor: pointer;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        transition: background 150ms, color 150ms;
+        flex-shrink: 0;
+      }
+
+      .vt-speak-btn:hover {
+        background: rgba(21, 101, 192, 0.1);
+      }
+
+      .vt-speak-btn--active {
+        color: #E65100;
+        animation: vt-speak-pulse 1s ease-in-out infinite;
+      }
+
+      @keyframes vt-speak-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
       }
 
       /* Loading animation */

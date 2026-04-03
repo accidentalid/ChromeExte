@@ -103,6 +103,12 @@ const DEFAULT_SETTINGS = {
       maxSizeMB: 50,
     },
   },
+  tts: {
+    enabled: true,
+    rate: 1.0,
+    pitch: 1.0,
+    voiceURI: '',
+  },
   floatingBubble: {
     enabled: true,
     position: { right: 24, bottom: 80 },
@@ -123,7 +129,7 @@ const ATTR_NAMES = {
 };
 
 // 扩展版本
-const EXTENSION_VERSION = '1.0.0';
+const EXTENSION_VERSION = '1.0.1';
 
 // 如果在非模块环境中，通过 window 暴露
 if (typeof window !== 'undefined') {

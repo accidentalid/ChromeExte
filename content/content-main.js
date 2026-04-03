@@ -23,6 +23,14 @@
         VT_STYLE_MANAGER.applyStyle(currentSettings.display.style);
       }
 
+      // 初始化 TTS 管理器
+      if (typeof VT_TTS_MANAGER !== 'undefined') {
+        VT_TTS_MANAGER.init();
+        if (currentSettings?.tts) {
+          VT_TTS_MANAGER.updateSettings(currentSettings.tts);
+        }
+      }
+
       // 初始化悬浮翻译按钮
       if (currentSettings?.floatingBubble?.enabled !== false) {
         VT_FLOATING_BUBBLE.init();
@@ -206,6 +214,11 @@
 
     if (newSettings.display?.mode) {
       VT_DOM_INJECTOR.setDisplayMode(newSettings.display.mode);
+    }
+
+    // 更新 TTS 设置
+    if (typeof VT_TTS_MANAGER !== 'undefined' && newSettings.tts) {
+      VT_TTS_MANAGER.updateSettings(newSettings.tts);
     }
 
     VT_SELECTION_HANDLER.setEnabled(newSettings.selectionTranslateEnabled !== false);

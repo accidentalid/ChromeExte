@@ -138,6 +138,41 @@
         <input type="checkbox" id="bubble-enabled" checked>
         <span class="track"><span class="thumb"></span></span>
       </label>
+
+      <div class="md-divider mt-24"></div>
+
+      <div class="section-title mt-24">语音朗读 (TTS)</div>
+      <div class="section-desc">使用 Web Speech API 朗读原文，方便学习英语发音</div>
+
+      <label class="md-switch mb-16">
+        <span>启用语音朗读</span>
+        <input type="checkbox" id="tts-enabled" checked>
+        <span class="track"><span class="thumb"></span></span>
+      </label>
+
+      <div class="md-slider mb-16">
+        <span class="text-md">语速</span>
+        <input type="range" id="tts-rate" min="0.5" max="2" value="1" step="0.1">
+        <span class="md-slider-value" id="tts-rate-value">1.0x</span>
+      </div>
+
+      <div class="md-slider mb-16">
+        <span class="text-md">音调</span>
+        <input type="range" id="tts-pitch" min="0.5" max="2" value="1" step="0.1">
+        <span class="md-slider-value" id="tts-pitch-value">1.0</span>
+      </div>
+
+      <div class="md-field">
+        <select id="tts-voice">
+          <option value="">默认语音</option>
+        </select>
+        <label>声音选择</label>
+      </div>
+
+      <button class="md-btn md-btn--outlined mt-16" id="btn-tts-test">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        测试语音
+      </button>
     </div>
 
     <!-- Panel: 提示词管理 -->

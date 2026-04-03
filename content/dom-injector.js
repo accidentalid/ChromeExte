@@ -20,7 +20,42 @@ const VT_DOM_INJECTOR = {
     transEl.className = 'vt-trans';
     transEl.setAttribute('data-vt-for', unitId);
     transEl.setAttribute('lang', targetLang);
-    transEl.textContent = translatedText;
+
+    // 创建译文文本 span
+    const textSpan = document.createElement('span');
+    textSpan.className = 'vt-trans-text';
+    textSpan.textContent = translatedText;
+    transEl.appendChild(textSpan);
+
+    // 添加朗读按钮（朗读原文）
+    const ttsSupported = typeof VT_TTS_MANAGER !== 'undefined' && VT_TTS_MANAGER.isSupported() && VT_TTS_MANAGER.settings.enabled;
+    if (ttsSupported) {
+      const speakBtn = document.createElement('button');
+      speakBtn.className = 'vt-tts-btn';
+      speakBtn.setAttribute('aria-label', '朗读原文');
+      speakBtn.setAttribute('title', '朗读原文');
+      speakBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+      speakBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const origEl = document.querySelector(`[data-vt-id="${unitId}"]`);
+        const origText = origEl ? origEl.textContent : '';
+        if (VT_TTS_MANAGER.speaking) {
+          VT_TTS_MANAGER.stop();
+          speakBtn.classList.remove('vt-tts-btn--active');
+        } else {
+          VT_TTS_MANAGER.speak(origText);
+          speakBtn.classList.add('vt-tts-btn--active');
+          const checkEnd = setInterval(() => {
+            if (!VT_TTS_MANAGER.speaking) {
+              speakBtn.classList.remove('vt-tts-btn--active');
+              clearInterval(checkEnd);
+            }
+          }, 200);
+        }
+      });
+      transEl.appendChild(speakBtn);
+    }
 
     // 处理 Flex/Grid 父容器
     const parent = original.parentElement;

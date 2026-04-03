@@ -218,6 +218,7 @@
     loadDisplaySettings();
     loadPromptSettings();
     loadAdvancedSettings();
+    loadTtsSettings();
   }
 
   function bindSettingsEvents() {
@@ -238,6 +239,7 @@
     bindDisplayEvents();
     bindPromptEvents();
     bindAdvancedEvents();
+    bindTtsEvents();
   }
 
   // --- Provider ---
@@ -466,6 +468,82 @@
         showSnackbar('导入失败: ' + err.message);
       }
       e.target.value = '';
+    });
+  }
+
+  // --- TTS ---
+  function loadTtsSettings() {
+    const tts = currentSettings.tts || {};
+    $('#sp-tts-enabled').checked = tts.enabled !== false;
+    $('#sp-tts-rate').value = tts.rate || 1.0;
+    $('#sp-tts-rate-value').textContent = (tts.rate || 1.0).toFixed(1) + 'x';
+    $('#sp-tts-pitch').value = tts.pitch || 1.0;
+    $('#sp-tts-pitch-value').textContent = (tts.pitch || 1.0).toFixed(1);
+
+    if ('speechSynthesis' in window) {
+      const populateVoices = () => {
+        const voiceSelect = $('#sp-tts-voice');
+        const voices = speechSynthesis.getVoices();
+        voiceSelect.innerHTML = '<option value="">默认语音</option>';
+        voices.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.voiceURI;
+          opt.textContent = `${v.name} (${v.lang})`;
+          if (v.voiceURI === (tts.voiceURI || '')) opt.selected = true;
+          voiceSelect.appendChild(opt);
+        });
+      };
+      populateVoices();
+      speechSynthesis.addEventListener('voiceschanged', populateVoices);
+    }
+  }
+
+  function bindTtsEvents() {
+    $('#sp-tts-enabled').addEventListener('change', () => {
+      if (!currentSettings.tts) currentSettings.tts = {};
+      currentSettings.tts.enabled = $('#sp-tts-enabled').checked;
+      autoSave();
+    });
+
+    $('#sp-tts-rate').addEventListener('input', () => {
+      const val = parseFloat($('#sp-tts-rate').value);
+      $('#sp-tts-rate-value').textContent = val.toFixed(1) + 'x';
+      if (!currentSettings.tts) currentSettings.tts = {};
+      currentSettings.tts.rate = val;
+      autoSave();
+    });
+
+    $('#sp-tts-pitch').addEventListener('input', () => {
+      const val = parseFloat($('#sp-tts-pitch').value);
+      $('#sp-tts-pitch-value').textContent = val.toFixed(1);
+      if (!currentSettings.tts) currentSettings.tts = {};
+      currentSettings.tts.pitch = val;
+      autoSave();
+    });
+
+    $('#sp-tts-voice').addEventListener('change', () => {
+      if (!currentSettings.tts) currentSettings.tts = {};
+      currentSettings.tts.voiceURI = $('#sp-tts-voice').value;
+      autoSave();
+    });
+
+    $('#sp-tts-test').addEventListener('click', () => {
+      if (!('speechSynthesis' in window)) {
+        showSnackbar('浏览器不支持语音');
+        return;
+      }
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance('Hello, this is a test of the text to speech feature.');
+      utterance.rate = parseFloat($('#sp-tts-rate').value) || 1.0;
+      utterance.pitch = parseFloat($('#sp-tts-pitch').value) || 1.0;
+      utterance.lang = 'en-US';
+      const uri = $('#sp-tts-voice').value;
+      if (uri) {
+        const voice = speechSynthesis.getVoices().find(v => v.voiceURI === uri);
+        if (voice) utterance.voice = voice;
+      }
+      speechSynthesis.speak(utterance);
+      showSnackbar('正在播放测试语音...');
     });
   }
 
