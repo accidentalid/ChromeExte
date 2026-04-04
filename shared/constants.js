@@ -52,7 +52,9 @@ const DEFAULT_PROMPTS = {
 1. 保持原文的格式、语气和风格
 2. 专业术语需准确翻译
 3. 如果文本包含 <sN>...</sN> 标签，请保留这些标签并翻译标签内的内容
-4. 只输出翻译结果，不要添加任何解释或注释`,
+4. 只输出翻译结果，不要添加任何解释或注释
+5. 跳过代码块（\`行内代码\` 和 \`\`\`代码块\`\`\`）不翻译，保持原样输出`,
+
 
   user: `{text}`,
 };
@@ -113,6 +115,9 @@ const DEFAULT_SETTINGS = {
     enabled: true,
     position: { right: 24, bottom: 80 },
   },
+  theme: {
+    primaryColor: '#1565C0',
+  },
   selectionTranslateEnabled: true,
   version: 1,
 };
@@ -129,7 +134,20 @@ const ATTR_NAMES = {
 };
 
 // 扩展版本
-const EXTENSION_VERSION = '1.0.1';
+const EXTENSION_VERSION = '1.0.2';
+
+// 服务商 UI 注册表（popup / options 共用）
+const PROVIDER_UI = {
+  openai:    { name: 'OpenAI',          icon: '🟢', models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'] },
+  gemini:    { name: 'Google Gemini',   icon: '🔵', models: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-pro'] },
+  anthropic: { name: 'Anthropic Claude',icon: '🟠', models: ['claude-sonnet-4-20250514', 'claude-haiku', 'claude-3-5-sonnet-20241022'], hint: '需通过 OpenAI 兼容网关接入' },
+  dashscope: { name: '阿里云百炼',      icon: '🟡', models: ['qwen-plus', 'qwen-turbo', 'qwen-max', 'qwen-long'] },
+  moonshot:  { name: '月之暗面 Kimi',   icon: '🌙', models: ['kimi-k2.5', 'moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'] },
+  minimax:   { name: 'MiniMax',         icon: '🔷', models: ['MiniMax-M2.7', 'MiniMax-M2.5', 'MiniMax-M2.1'] },
+  zhipu:     { name: '智谱AI GLM',      icon: '🟣', models: ['glm-5', 'glm-4.7', 'glm-4-flash', 'glm-4-plus'] },
+  hunyuan:   { name: '腾讯混元',        icon: '🔴', models: ['hunyuan-pro', 'hunyuan-turbo', 'hunyuan-standard', 'hunyuan-lite'] },
+  custom:    { name: '自定义',          icon: '⚙️', models: [], hint: '输入 OpenAI 兼容接口地址' },
+};
 
 // 如果在非模块环境中，通过 window 暴露
 if (typeof window !== 'undefined') {
@@ -142,6 +160,7 @@ if (typeof window !== 'undefined') {
     CSS_PREFIX,
     ATTR_NAMES,
     EXTENSION_VERSION,
+    PROVIDER_UI,
   };
 }
 
@@ -156,5 +175,6 @@ if (typeof exports !== 'undefined') {
     CSS_PREFIX,
     ATTR_NAMES,
     EXTENSION_VERSION,
+    PROVIDER_UI,
   });
 }

@@ -232,37 +232,38 @@ export async function getCacheStats() {
 }
 
 /**
- * 淘汰旧缓存（按访问时间排序，删除最旧的 ratio 比例）
+ * 淘汰旧缓存（按访问时间排序，超过 maxCount 条时删除最旧的）
  */
-export async function evictOldCache(maxSizeMB = 50) {
-  const stats = await getCacheStats();
-  if (parseFloat(stats.estimatedSizeMB) <= maxSizeMB) return;
-
+export async function evictOldCache(maxCount = 50) {
   try {
     const db = await getDB();
-    const targetSize = maxSizeMB * 0.8 * 1024 * 1024; // 清理到 80%
-
     return new Promise((resolve) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      const index = store.index('accessedAt');
-      const request = index.openCursor();
-      let removedSize = 0;
-      const excessSize = stats.estimatedSizeBytes - targetSize;
+      const countReq = store.count();
 
-      request.onsuccess = () => {
-        const cursor = request.result;
-        if (cursor && removedSize < excessSize) {
-          const record = cursor.value;
-          removedSize += (record.sourceText || '').length * 2 + (record.translatedText || '').length * 2;
-          cursor.delete();
-          cursor.continue();
-        } else {
-          resolve();
-        }
+      countReq.onsuccess = () => {
+        const total = countReq.result;
+        if (total <= maxCount) { resolve(); return; }
+
+        const deleteCount = total - maxCount;
+        const index = store.index('accessedAt');
+        const cursorReq = index.openCursor();
+        let deleted = 0;
+
+        cursorReq.onsuccess = () => {
+          const cursor = cursorReq.result;
+          if (cursor && deleted < deleteCount) {
+            cursor.delete();
+            deleted++;
+            cursor.continue();
+          } else {
+            resolve();
+          }
+        };
+        cursorReq.onerror = () => resolve();
       };
-
-      request.onerror = () => resolve();
+      countReq.onerror = () => resolve();
     });
   } catch {
     // 静默失败

@@ -4,20 +4,23 @@
 (function () {
   'use strict';
 
-  const { DEFAULT_SETTINGS, DEFAULT_PROMPTS } = window.VT_CONSTANTS;
+  const { DEFAULT_SETTINGS, DEFAULT_PROMPTS, PROVIDER_UI } = window.VT_CONSTANTS;
 
-  // 服务商注册表（与 background/providers.js 同步）
-  const PROVIDERS = {
-    openai:    { name: 'OpenAI',          icon: '🟢', models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'] },
-    gemini:    { name: 'Google Gemini',   icon: '🔵', models: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-pro'] },
-    anthropic: { name: 'Anthropic Claude',icon: '🟠', models: ['claude-sonnet-4-20250514', 'claude-haiku', 'claude-3-5-sonnet-20241022'], hint: '需通过 OpenAI 兼容网关接入' },
-    dashscope: { name: '阿里云百炼',      icon: '🟡', models: ['qwen-plus', 'qwen-turbo', 'qwen-max', 'qwen-long'] },
-    moonshot:  { name: '月之暗面 Kimi',   icon: '🌙', models: ['kimi-k2.5', 'moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'] },
-    minimax:   { name: 'MiniMax',         icon: '🔷', models: ['MiniMax-M2.7', 'MiniMax-M2.5', 'MiniMax-M2.1'] },
-    zhipu:     { name: '智谱AI GLM',      icon: '🟣', models: ['glm-5', 'glm-4.7', 'glm-4-flash', 'glm-4-plus'] },
-    hunyuan:   { name: '腾讯混元',        icon: '🔴', models: ['hunyuan-pro', 'hunyuan-turbo', 'hunyuan-standard', 'hunyuan-lite'] },
-    custom:    { name: '自定义',          icon: '⚙️', models: [], hint: '输入 OpenAI 兼容接口地址' },
-  };
+  const PROVIDERS = PROVIDER_UI;
+
+  // 颜色预设
+  const COLOR_PRESETS = [
+    { color: '#424242', name: '深灰' },
+    { color: '#1565C0', name: '蓝色' },
+    { color: '#2E7D32', name: '绿色' },
+    { color: '#C62828', name: '红色' },
+    { color: '#E65100', name: '橙色' },
+    { color: '#6A1B9A', name: '紫色' },
+    { color: '#00695C', name: '青色' },
+    { color: '#AD1457', name: '粉色' },
+    { color: '#37474F', name: '墨色' },
+    { color: '#F57F17', name: '金色' },
+  ];
 
   let settings = null;
   let activeProviderKey = 'openai';
@@ -44,7 +47,6 @@
     loadPromptSettings();
     loadShortcuts();
     loadAdvancedSettings();
-    loadCacheStats();
     loadTtsSettings();
 
     bindTabEvents();
@@ -75,14 +77,10 @@
   // 翻译服务配置
   // ============================================
   function renderProviderCards() {
-    const container = $('#provider-cards');
-    container.innerHTML = Object.entries(PROVIDERS).map(([key, p]) => `
-      <label class="md-radio-card">
-        <input type="radio" name="provider" value="${key}" ${key === activeProviderKey ? 'checked' : ''}>
-        <span class="radio-dot"></span>
-        <span class="radio-label">${p.icon} ${p.name}</span>
-      </label>
-    `).join('');
+    const select = $('#provider-select');
+    select.innerHTML = Object.entries(PROVIDERS).map(([key, p]) =>
+      `<option value="${key}" ${key === activeProviderKey ? 'selected' : ''}>${p.icon} ${p.name}</option>`
+    ).join('');
   }
 
   function loadProviderConfig(key) {
@@ -103,13 +101,11 @@
 
   function bindProviderEvents() {
     // 切换服务商
-    $$('input[name="provider"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        activeProviderKey = radio.value;
-        settings.activeProvider = activeProviderKey;
-        loadProviderConfig(activeProviderKey);
-        autoSave();
-      });
+    $('#provider-select').addEventListener('change', (e) => {
+      activeProviderKey = e.target.value;
+      settings.activeProvider = activeProviderKey;
+      loadProviderConfig(activeProviderKey);
+      autoSave();
     });
 
     // 配置项变更
@@ -162,16 +158,14 @@
     const d = settings.display || {};
     const s = d.style || {};
 
-    // 显示模式
-    $$('[data-display-mode]').forEach(chip => {
-      chip.classList.toggle('md-chip--selected', chip.dataset.displayMode === d.mode);
-    });
-
     // 样式选项
     $('#style-bold').checked = s.bold || false;
     $('#style-underline').checked = s.underline || false;
     $('#style-color').value = s.color || '#666666';
     $('#style-color-value').textContent = s.color || '#666666';
+
+    // 渲染颜色预设
+    renderColorPresets(s.color || '#666666');
 
     if (s.backgroundColor) {
       $('#style-bg-color').value = s.backgroundColor;
@@ -191,17 +185,23 @@
     $('#bubble-enabled').checked = settings.floatingBubble?.enabled !== false;
   }
 
-  function bindDisplayEvents() {
-    // 显示模式
-    $$('[data-display-mode]').forEach(chip => {
-      chip.addEventListener('click', () => {
-        $$('[data-display-mode]').forEach(c => c.classList.remove('md-chip--selected'));
-        chip.classList.add('md-chip--selected');
-        settings.display.mode = chip.dataset.displayMode;
-        autoSave();
-      });
-    });
+  /**
+   * 渲染颜色预设色块
+   */
+  function renderColorPresets(activeColor) {
+    const container = $('#color-presets');
+    if (!container) return;
 
+    container.innerHTML = COLOR_PRESETS.map(p => `
+      <button class="md-color-swatch${p.color.toLowerCase() === activeColor.toLowerCase() ? ' md-color-swatch--active' : ''}"
+              data-preset-color="${p.color}"
+              title="${p.name}"
+              style="background:${p.color};"
+              aria-label="${p.name}"></button>
+    `).join('');
+  }
+
+  function bindDisplayEvents() {
     // 样式
     $('#style-bold').addEventListener('change', () => { settings.display.style.bold = $('#style-bold').checked; autoSave(); });
     $('#style-underline').addEventListener('change', () => { settings.display.style.underline = $('#style-underline').checked; autoSave(); });
@@ -210,8 +210,24 @@
       const val = $('#style-color').value;
       $('#style-color-value').textContent = val;
       settings.display.style.color = val;
+      renderColorPresets(val);
       autoSave();
     });
+
+    // 颜色预设点击
+    const presetsContainer = $('#color-presets');
+    if (presetsContainer) {
+      presetsContainer.addEventListener('click', (e) => {
+        const swatch = e.target.closest('.md-color-swatch');
+        if (!swatch) return;
+        const color = swatch.dataset.presetColor;
+        settings.display.style.color = color;
+        $('#style-color').value = color;
+        $('#style-color-value').textContent = color;
+        renderColorPresets(color);
+        autoSave();
+      });
+    }
 
     $('#style-bg-color').addEventListener('input', () => {
       const val = $('#style-bg-color').value;
@@ -320,18 +336,6 @@
     $('#timeout-value').textContent = (a.timeout || 30) + 's';
 
     $('#cache-enabled').checked = c.enabled !== false;
-    $('#cache-ttl').value = c.ttlHours || 72;
-    $('#cache-ttl-value').textContent = (c.ttlHours || 72) + 'h';
-
-    $('#cache-max-size').value = c.maxSizeMB || 50;
-    $('#cache-max-value').textContent = (c.maxSizeMB || 50) + 'MB';
-  }
-
-  async function loadCacheStats() {
-    const stats = await VT_MESSAGE_BUS.sendToBackground('get_cache_stats', {});
-    if (stats) {
-      $('#cache-stats').textContent = `缓存大小: ${stats.estimatedSizeMB}MB (${stats.count} 条)`;
-    }
   }
 
   function bindAdvancedEvents() {
@@ -353,31 +357,9 @@
 
     // 缓存开关
     $('#cache-enabled').addEventListener('change', () => {
+      if (!settings.advanced.cache) settings.advanced.cache = {};
       settings.advanced.cache.enabled = $('#cache-enabled').checked;
       autoSave();
-    });
-
-    // 缓存 TTL
-    $('#cache-ttl').addEventListener('input', () => {
-      const val = parseInt($('#cache-ttl').value);
-      $('#cache-ttl-value').textContent = val + 'h';
-      settings.advanced.cache.ttlHours = val;
-      autoSave();
-    });
-
-    // 缓存容量
-    $('#cache-max-size').addEventListener('input', () => {
-      const val = parseInt($('#cache-max-size').value);
-      $('#cache-max-value').textContent = val + 'MB';
-      settings.advanced.cache.maxSizeMB = val;
-      autoSave();
-    });
-
-    // 清除缓存
-    $('#btn-clear-cache').addEventListener('click', async () => {
-      await VT_MESSAGE_BUS.sendToBackground('clear_cache', {});
-      showSnackbar('缓存已清除', 'success');
-      loadCacheStats();
     });
 
     // 导出配置

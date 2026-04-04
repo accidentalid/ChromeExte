@@ -4,21 +4,18 @@
 (function () {
   'use strict';
 
-  const { MESSAGE_TYPES, DISPLAY_MODES, DEFAULT_SETTINGS, DEFAULT_PROMPTS } = window.VT_CONSTANTS;
+  const { MESSAGE_TYPES, DISPLAY_MODES, DEFAULT_SETTINGS, DEFAULT_PROMPTS, PROVIDER_UI } = window.VT_CONSTANTS;
   const { LANGUAGE_LIST, getTargetLanguages } = window.VT_LANGUAGES;
 
-  // 服务商注册表
-  const PROVIDERS = {
-    openai:    { name: 'OpenAI',          icon: '🟢', models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'] },
-    gemini:    { name: 'Google Gemini',   icon: '🔵', models: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-pro'] },
-    anthropic: { name: 'Anthropic Claude',icon: '🟠', models: ['claude-sonnet-4-20250514', 'claude-haiku', 'claude-3-5-sonnet-20241022'], hint: '需通过 OpenAI 兼容网关接入' },
-    dashscope: { name: '阿里云百炼',      icon: '🟡', models: ['qwen-plus', 'qwen-turbo', 'qwen-max', 'qwen-long'] },
-    moonshot:  { name: '月之暗面 Kimi',   icon: '🌙', models: ['kimi-k2.5', 'moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'] },
-    minimax:   { name: 'MiniMax',         icon: '🔷', models: ['MiniMax-M2.7', 'MiniMax-M2.5', 'MiniMax-M2.1'] },
-    zhipu:     { name: '智谱AI GLM',      icon: '🟣', models: ['glm-5', 'glm-4.7', 'glm-4-flash', 'glm-4-plus'] },
-    hunyuan:   { name: '腾讯混元',        icon: '🔴', models: ['hunyuan-pro', 'hunyuan-turbo', 'hunyuan-standard', 'hunyuan-lite'] },
-    custom:    { name: '自定义',          icon: '⚙️', models: [], hint: '输入 OpenAI 兼容接口地址' },
-  };
+  const PROVIDERS = PROVIDER_UI;
+
+  // UI 主题预设
+  const UI_THEMES = [
+    { key: 'blue',   label: '蓝色', primary: '#1565C0', light: '#1E88E5', dark: '#0D47A1', container: '#D1E4FF', onContainer: '#001D36' },
+    { key: 'purple', label: '紫色', primary: '#6A1B9A', light: '#8E24AA', dark: '#4A148C', container: '#F3E5F5', onContainer: '#38006b' },
+    { key: 'teal',   label: '青色', primary: '#00695C', light: '#00897B', dark: '#004D40', container: '#E0F2F1', onContainer: '#00251a' },
+    { key: 'rose',   label: '玫红', primary: '#AD1457', light: '#C2185B', dark: '#880E4F', container: '#FCE4EC', onContainer: '#5e0028' },
+  ];
 
   // DOM
   const $ = (sel) => document.querySelector(sel);
@@ -244,14 +241,10 @@
 
   // --- Provider ---
   function renderProviderCards() {
-    const container = $('#sp-provider-cards');
-    container.innerHTML = Object.entries(PROVIDERS).map(([key, p]) => `
-      <label class="md-radio-card">
-        <input type="radio" name="sp-provider" value="${key}" ${key === activeProviderKey ? 'checked' : ''}>
-        <span class="radio-dot"></span>
-        <span class="radio-label">${p.icon} ${p.name}</span>
-      </label>
-    `).join('');
+    const select = $('#sp-provider-select');
+    select.innerHTML = Object.entries(PROVIDERS).map(([key, p]) =>
+      `<option value="${key}" ${key === activeProviderKey ? 'selected' : ''}>${p.icon} ${p.name}</option>`
+    ).join('');
   }
 
   function loadProviderConfig(key) {
@@ -268,13 +261,11 @@
   }
 
   function bindProviderEvents() {
-    $('#sp-provider-cards').addEventListener('change', (e) => {
-      if (e.target.name === 'sp-provider') {
-        activeProviderKey = e.target.value;
-        currentSettings.activeProvider = activeProviderKey;
-        loadProviderConfig(activeProviderKey);
-        autoSave();
-      }
+    $('#sp-provider-select').addEventListener('change', (e) => {
+      activeProviderKey = e.target.value;
+      currentSettings.activeProvider = activeProviderKey;
+      loadProviderConfig(activeProviderKey);
+      autoSave();
     });
 
     ['sp-base-url', 'sp-api-key', 'sp-model', 'sp-custom-model'].forEach(id => {
@@ -315,19 +306,55 @@
   function loadDisplaySettings() {
     const d = currentSettings.display || {};
     const s = d.style || {};
+
+    // 主题色
+    renderThemeSwatches(currentSettings.theme?.key || 'blue');
+    applyTheme(currentSettings.theme?.key || 'blue');
+
     $$('[data-sp-display-mode]').forEach(chip => {
       chip.classList.toggle('md-chip--selected', chip.dataset.spDisplayMode === d.mode);
     });
     $('#sp-style-bold').checked = s.bold || false;
     $('#sp-style-underline').checked = s.underline || false;
-    $('#sp-style-color').value = s.color || '#666666';
-    $('#sp-style-color-value').textContent = s.color || '#666666';
+
     $$('[data-sp-font-size]').forEach(chip => {
       chip.classList.toggle('md-chip--selected', chip.dataset.spFontSize === (s.fontSize || 'same'));
     });
   }
 
+  function renderThemeSwatches(activeKey) {
+    const container = $('#sp-theme-swatches');
+    container.innerHTML = UI_THEMES.map(t =>
+      `<button class="theme-swatch${t.key === activeKey ? ' theme-swatch--active' : ''}"
+               data-theme="${t.key}"
+               style="background:${t.primary};"
+               title="${t.label}">${t.label}</button>`
+    ).join('');
+  }
+
+  function applyTheme(key) {
+    const theme = UI_THEMES.find(t => t.key === key) || UI_THEMES[0];
+    const root = document.documentElement;
+    root.style.setProperty('--md-primary', theme.primary);
+    root.style.setProperty('--md-primary-light', theme.light);
+    root.style.setProperty('--md-primary-dark', theme.dark);
+    root.style.setProperty('--md-primary-container', theme.container);
+    root.style.setProperty('--md-on-primary-container', theme.onContainer);
+  }
+
   function bindDisplayEvents() {
+    // 主题切换
+    $('#sp-theme-swatches').addEventListener('click', (e) => {
+      const swatch = e.target.closest('.theme-swatch');
+      if (!swatch) return;
+      const key = swatch.dataset.theme;
+      if (!currentSettings.theme) currentSettings.theme = {};
+      currentSettings.theme.key = key;
+      renderThemeSwatches(key);
+      applyTheme(key);
+      autoSave();
+    });
+
     $$('[data-sp-display-mode]').forEach(chip => {
       chip.addEventListener('click', () => {
         $$('[data-sp-display-mode]').forEach(c => c.classList.remove('md-chip--selected'));
@@ -343,12 +370,6 @@
     });
     $('#sp-style-underline').addEventListener('change', () => {
       currentSettings.display.style.underline = $('#sp-style-underline').checked;
-      autoSave();
-    });
-    $('#sp-style-color').addEventListener('input', () => {
-      const val = $('#sp-style-color').value;
-      $('#sp-style-color-value').textContent = val;
-      currentSettings.display.style.color = val;
       autoSave();
     });
 
@@ -400,14 +421,6 @@
     $('#sp-timeout').value = a.timeout || 30;
     $('#sp-timeout-value').textContent = (a.timeout || 30) + 's';
     $('#sp-cache-enabled').checked = c.enabled !== false;
-    loadCacheStats();
-  }
-
-  async function loadCacheStats() {
-    const stats = await VT_MESSAGE_BUS.sendToBackground('get_cache_stats', {});
-    if (stats) {
-      $('#sp-cache-stats').textContent = `缓存: ${stats.estimatedSizeMB}MB (${stats.count} 条)`;
-    }
   }
 
   function bindAdvancedEvents() {
@@ -423,14 +436,12 @@
       currentSettings.advanced.timeout = val;
       autoSave();
     });
+
+    // 缓存开关
     $('#sp-cache-enabled').addEventListener('change', () => {
+      if (!currentSettings.advanced.cache) currentSettings.advanced.cache = {};
       currentSettings.advanced.cache.enabled = $('#sp-cache-enabled').checked;
       autoSave();
-    });
-    $('#sp-clear-cache').addEventListener('click', async () => {
-      await VT_MESSAGE_BUS.sendToBackground('clear_cache', {});
-      showSnackbar('缓存已清除');
-      loadCacheStats();
     });
 
     // 导出

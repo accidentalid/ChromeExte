@@ -1,2 +1,13 @@
 .qoder/
 docs/
+.claude/
+.idea/
+.vscode/
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.DS_Store
+*.pyc
+__pycache__/

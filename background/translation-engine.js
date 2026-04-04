@@ -1,9 +1,9 @@
 /**
- * 翻译引擎 - 分片、并发、缓存编排
+ * 翻译引擎 - 逐段落并发翻译 + 缓存编排
  */
 
 import { callLLM, callLLMWithRetry } from './api-adapter.js';
-import { buildMessages, buildBatchMessages } from './prompt-builder.js';
+import { buildMessages } from './prompt-builder.js';
 import { getCache, setCache, makeCacheKey, evictOldCache } from './cache-manager.js';
 import { getSettings, getActiveProviderConfig } from './settings-manager.js';
 
@@ -34,7 +34,6 @@ class Semaphore {
 
   updateMax(newMax) {
     this.max = newMax;
-    // 如果新的 max 更大，释放等待者
     while (this.current < this.max && this.queue.length > 0) {
       this.current++;
       const next = this.queue.shift();
@@ -49,7 +48,7 @@ class Semaphore {
 }
 
 let semaphore = new Semaphore(3);
-let writeCount = 0;
+const MAX_CACHE_ENTRIES = 50;
 
 /**
  * 翻译单条文本（用于划词翻译）
@@ -93,17 +92,15 @@ export async function translateSelection(text, sourceLang, targetLang, domain = 
       provider: providerConfig.providerKey,
       model: providerConfig.model,
     });
-    writeCount++;
-    if (writeCount % 100 === 0) {
-      evictOldCache(settings.advanced.cache.maxSizeMB).catch(() => {});
-    }
+    evictOldCache(MAX_CACHE_ENTRIES).catch(() => {});
   }
 
   return { success: result.success, content: result.content, error: result.error, cached: false };
 }
 
 /**
- * 翻译页面（批量翻译）
+ * 翻译页面（逐段落独立翻译，并发控制）
+ * 每个段落（翻译单元）独立发送一次翻译请求，由信号量控制并发数。
  * @param {Array<{unitId: string, text: string}>} units - 翻译单元列表
  * @param {string} sourceLang
  * @param {string} targetLang
@@ -143,9 +140,7 @@ export async function translatePage(units, sourceLang, targetLang, domain, tabId
         type: 'translation_result',
         payload: { results: cachedResults },
       });
-    } catch {
-      // Tab 可能已关闭
-    }
+    } catch {}
   }
 
   if (uncachedUnits.length === 0) {
@@ -155,13 +150,11 @@ export async function translatePage(units, sourceLang, targetLang, domain, tabId
     return;
   }
 
-  // 分批
-  const chunks = chunkUnits(uncachedUnits, 2000);
-  let completedBatches = 0;
-  const totalBatches = chunks.length;
+  const totalCount = uncachedUnits.length + cachedResults.length;
+  let completedCount = cachedResults.length;
 
-  // 并发处理各批次
-  const batchPromises = chunks.map(async (chunk) => {
+  // 逐段落并发翻译
+  const unitPromises = uncachedUnits.map(async (unit) => {
     if (signal?.aborted) return;
 
     await semaphore.acquire();
@@ -171,10 +164,10 @@ export async function translatePage(units, sourceLang, targetLang, domain, tabId
     }
 
     try {
-      const messages = buildBatchMessages({
+      const messages = buildMessages({
         systemPrompt: settings.prompts.system,
         userPrompt: settings.prompts.user,
-        segments: chunk,
+        text: unit.text,
         sourceLang: sourceLang === 'auto' ? '自动检测' : sourceLang,
         targetLang,
         domain,
@@ -186,60 +179,46 @@ export async function translatePage(units, sourceLang, targetLang, domain, tabId
       });
 
       if (result.success) {
-        // 解析带标签的结果
-        const translations = parseTaggedResult(result.content, chunk.length);
-        const results = chunk.map((seg, i) => ({
-          unitId: seg.unitId,
-          text: translations[i] || '',
-          cached: false,
-        }));
+        const translatedText = result.content;
 
         // 写入缓存
         if (settings.advanced.cache.enabled) {
-          for (let i = 0; i < chunk.length; i++) {
-            if (translations[i]) {
-              const cacheKey = makeCacheKey(sourceLang, targetLang, providerConfig.providerKey, providerConfig.model, chunk[i].text);
-              await setCache(cacheKey, {
-                sourceText: chunk[i].text,
-                translatedText: translations[i],
-                sourceLang,
-                targetLang,
-                provider: providerConfig.providerKey,
-                model: providerConfig.model,
-              });
-              writeCount++;
-            }
-          }
+          const cacheKey = makeCacheKey(sourceLang, targetLang, providerConfig.providerKey, providerConfig.model, unit.text);
+          await setCache(cacheKey, {
+            sourceText: unit.text,
+            translatedText,
+            sourceLang,
+            targetLang,
+            provider: providerConfig.providerKey,
+            model: providerConfig.model,
+          });
         }
 
-        // 发送结果到 Content Script
+        // 发送结果
         try {
           await chrome.tabs.sendMessage(tabId, {
             type: 'translation_result',
-            payload: { results },
+            payload: { results: [{ unitId: unit.unitId, text: translatedText, cached: false }] },
           });
         } catch {}
       } else {
-        // 发送错误
-        const errorResults = chunk.map(seg => ({
-          unitId: seg.unitId,
-          text: '',
-          error: result.error?.message || '翻译失败',
-        }));
         try {
           await chrome.tabs.sendMessage(tabId, {
             type: 'translation_error',
-            payload: { results: errorResults, error: result.error },
+            payload: {
+              results: [{ unitId: unit.unitId, text: '', error: result.error?.message || '翻译失败' }],
+              error: result.error,
+            },
           });
         } catch {}
       }
 
-      completedBatches++;
+      completedCount++;
       // 发送进度
       try {
         await chrome.tabs.sendMessage(tabId, {
           type: 'translation_progress',
-          payload: { completed: completedBatches + cachedResults.length, total: totalBatches + cachedResults.length },
+          payload: { completed: completedCount, total: totalCount },
         });
       } catch {}
     } finally {
@@ -247,13 +226,10 @@ export async function translatePage(units, sourceLang, targetLang, domain, tabId
     }
   });
 
-  await Promise.allSettled(batchPromises);
+  await Promise.allSettled(unitPromises);
 
-  // 周期性缓存淘汰
-  if (writeCount >= 100) {
-    writeCount = 0;
-    evictOldCache(settings.advanced.cache.maxSizeMB).catch(() => {});
-  }
+  // 批量翻译完成后淘汰超限缓存
+  evictOldCache(MAX_CACHE_ENTRIES).catch(() => {});
 
   // 发送翻译完成
   try {
@@ -283,56 +259,4 @@ export async function testProvider(providerKey) {
   ];
 
   return callLLM(config, messages, { timeout: 15000 });
-}
-
-/**
- * 将翻译单元分块
- */
-function chunkUnits(units, maxChars = 2000) {
-  const chunks = [];
-  let currentChunk = [];
-  let currentLength = 0;
-
-  for (const unit of units) {
-    const textLen = unit.text.length;
-    if (currentLength + textLen > maxChars && currentChunk.length > 0) {
-      chunks.push(currentChunk);
-      currentChunk = [];
-      currentLength = 0;
-    }
-    currentChunk.push(unit);
-    currentLength += textLen;
-  }
-
-  if (currentChunk.length > 0) {
-    chunks.push(currentChunk);
-  }
-
-  return chunks;
-}
-
-/**
- * 解析带标签的翻译结果
- */
-function parseTaggedResult(text, count) {
-  const results = [];
-  for (let i = 1; i <= count; i++) {
-    const regex = new RegExp(`<s${i}>([\\s\\S]*?)</s${i}>`);
-    const match = text.match(regex);
-    results.push(match ? match[1].trim() : '');
-  }
-
-  // 回退策略：如果标签解析完全失败且只有一个段落
-  if (results.every(r => r === '')) {
-    if (count === 1) {
-      return [text.trim()];
-    }
-    // 尝试按行分割
-    const lines = text.trim().split('\n').filter(l => l.trim());
-    if (lines.length === count) {
-      return lines.map(l => l.trim());
-    }
-  }
-
-  return results;
 }

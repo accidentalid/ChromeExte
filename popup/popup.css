@@ -4,7 +4,7 @@
 
 body {
   width: 380px;
-  min-height: 420px;
+  min-height: 440px;
   max-height: 580px;
   padding: 0;
   margin: 0;
@@ -37,7 +37,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--md-outline-variant);
   background: var(--md-surface);
 }
@@ -57,12 +57,13 @@ body {
 .header-title {
   font: var(--md-font-title-md);
   color: var(--md-on-surface);
+  letter-spacing: 0.2px;
 }
 
 /* Status Card */
 .status-card {
-  margin: 12px 16px 0;
-  padding: 12px 16px;
+  margin: 14px 20px 0;
+  padding: 14px 18px;
 }
 
 .status-row {
@@ -106,7 +107,7 @@ body {
 
 /* Language Card */
 .lang-card {
-  margin: 12px 16px 0;
+  margin: 14px 20px 0;
   padding: 16px;
 }
 
@@ -146,8 +147,8 @@ body {
 
 /* Mode Card */
 .mode-card {
-  margin: 12px 16px 0;
-  padding: 12px 16px;
+  margin: 14px 20px 0;
+  padding: 12px 18px;
 }
 
 .mode-label {
@@ -157,7 +158,7 @@ body {
 
 /* Action Section */
 .action-section {
-  padding: 16px;
+  padding: 18px 20px;
 }
 
 .translate-btn {
@@ -165,6 +166,7 @@ body {
   font-size: 15px;
   gap: 10px;
   border-radius: var(--md-shape-md);
+  letter-spacing: 0.3px;
 }
 
 .translate-btn--stop {
@@ -177,7 +179,7 @@ body {
 
 /* Quick Section */
 .quick-section {
-  padding: 0 16px 12px;
+  padding: 0 20px 14px;
 }
 
 .quick-section .md-switch {
@@ -196,7 +198,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 14px 20px;
   border-top: 1px solid var(--md-outline-variant);
 }
 
@@ -246,9 +248,11 @@ body {
 .settings-scroll::-webkit-scrollbar {
   width: 4px;
 }
+
 .settings-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .settings-scroll::-webkit-scrollbar-thumb {
   background: #CCC;
   border-radius: 2px;
@@ -256,7 +260,7 @@ body {
 
 /* Settings Panel */
 .settings-panel {
-  padding: 16px;
+  padding: 18px 20px;
 }
 
 .sp-title {
@@ -269,38 +273,13 @@ body {
   font: var(--md-font-body-sm);
   color: var(--md-on-surface-variant);
   margin: 0 0 10px;
+  line-height: 1.5;
 }
 
 .sp-divider {
   height: 1px;
   background: var(--md-outline-variant);
-  margin: 14px 0;
-}
-
-/* Provider Cards (Compact) */
-.sp-providers {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.sp-providers .md-radio-card {
-  padding: 8px 6px;
-  border-radius: 8px;
-  font-size: 11px;
-  text-align: center;
-  min-height: auto;
-}
-
-.sp-providers .md-radio-card .radio-label {
-  font-size: 11px;
-  display: block;
-  line-height: 1.3;
-}
-
-.sp-providers .md-radio-card .radio-dot {
-  margin: 0 auto 4px;
+  margin: 16px 0;
 }
 
 /* Settings Row */
@@ -320,6 +299,46 @@ body {
 
 .sp-half-btn {
   flex: 1;
+}
+
+/* Theme Swatches */
+.theme-swatches {
+  display: flex;
+  gap: 10px;
+}
+
+.theme-swatch {
+  width: 56px;
+  height: 36px;
+  border-radius: var(--md-shape-sm);
+  border: 2px solid var(--md-outline-variant);
+  cursor: pointer;
+  transition: all var(--md-motion-duration-short) var(--md-motion-standard);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--md-font-label-md);
+  color: #FFF;
+  user-select: none;
+}
+
+.theme-swatch:hover {
+  transform: scale(1.08);
+  box-shadow: var(--md-elevation-2);
+}
+
+.theme-swatch--active {
+  border-color: var(--md-on-surface);
+  border-width: 2.5px;
+  box-shadow: var(--md-elevation-1);
+}
+
+.theme-swatch--active::after {
+  content: '✓';
+  font-size: 14px;
+  color: #FFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 /* Compact field adjustments */
@@ -369,3 +388,4 @@ body {
 
 /* Margin helpers */
 .mb-12 { margin-bottom: 12px; }
+.mt-8 { margin-top: 8px; }

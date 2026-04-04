@@ -10,6 +10,9 @@ const VT_TEXT_EXTRACTOR = {
     'IMG', 'BR', 'HR', 'MATH',
   ]),
 
+  // Markdown 渲染后常见的代码块容器 class 关键词
+  CODE_BLOCK_CLASSES: ['highlight', 'codehilite', 'code-block', 'source-code', 'gist', 'CodeMirror'],
+
   // 块级标签
   BLOCK_TAGS: new Set([
     'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
@@ -136,9 +139,20 @@ const VT_TEXT_EXTRACTOR = {
       if (current.isContentEditable) return true;
       if (current.hasAttribute('data-vt-for')) return true;
       if (current.hasAttribute('data-vt-ext')) return true;
+      // 跳过 Markdown 渲染的代码块容器
+      if (this.isCodeBlockContainer(current)) return true;
       current = current.parentElement;
     }
     return false;
+  },
+
+  /**
+   * 判断元素是否为 Markdown 渲染的代码块容器
+   */
+  isCodeBlockContainer(el) {
+    if (!el.className || typeof el.className !== 'string') return false;
+    const cls = el.className.toLowerCase();
+    return this.CODE_BLOCK_CLASSES.some(kw => cls.includes(kw.toLowerCase()));
   },
 
   /**

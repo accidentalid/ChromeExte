@@ -58,7 +58,9 @@ export function buildBatchMessages({ systemPrompt, userPrompt, segments, sourceL
   const taggedText = segments.map((seg, i) => `<s${i + 1}>${seg.text}</s${i + 1}>`).join('\n');
 
   // 为批量翻译增强系统 Prompt
-  const batchSystemAddendum = `\n\n重要：输入文本包含编号标签 <sN>...</sN>，请保留这些标签并翻译标签内的文本内容。输出格式必须与输入保持一致。`;
+  const batchSystemAddendum = `\n\n重要规则：
+1. 输入文本包含编号标签 <sN>...</sN>，请保留这些标签并翻译标签内的文本内容。输出格式必须与输入保持一致。
+2. 如果文本中包含代码（如 markdown 代码块 \`code\` 或 \`\`\`code block\`\`\`），请完全保留代码内容不做翻译，仅翻译代码外的自然语言文本。`;
 
   return buildMessages({
     systemPrompt: systemPrompt + batchSystemAddendum,

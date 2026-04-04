@@ -650,7 +650,7 @@ body {
 }
 
 /* ============================================
-   Color Picker Wrapper
+   Color Picker with Presets
    ============================================ */
 .md-color-input {
   display: inline-flex;
@@ -659,18 +659,88 @@ body {
 }
 
 .md-color-input input[type="color"] {
-  width: 40px;
-  height: 32px;
-  border: 1px solid var(--md-outline-variant);
-  border-radius: var(--md-shape-xs);
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--md-outline-variant);
+  border-radius: var(--md-shape-sm);
   padding: 2px;
   cursor: pointer;
   background: none;
+  transition: border-color var(--md-motion-duration-short) var(--md-motion-standard);
+}
+
+.md-color-input input[type="color"]:hover {
+  border-color: var(--md-primary);
 }
 
 .md-color-input .md-color-value {
-  font: var(--md-font-body-sm);
+  font: var(--md-font-label-md);
   color: var(--md-on-surface-variant);
+  font-family: monospace;
+}
+
+/* Color preset swatches */
+.md-color-presets {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.md-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--md-shape-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--md-motion-duration-short) var(--md-motion-standard);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.md-color-swatch:hover {
+  transform: scale(1.15);
+  box-shadow: var(--md-elevation-2);
+}
+
+.md-color-swatch--active {
+  border-color: var(--md-primary);
+  box-shadow: 0 0 0 2px var(--md-primary-container);
+}
+
+.md-color-swatch--custom {
+  background: conic-gradient(
+    from 0deg,
+    #f44336, #ff9800, #ffeb3b, #4caf50, #2196f3, #9c27b0, #f44336
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.md-color-swatch--custom svg {
+  width: 14px;
+  height: 14px;
+  fill: #FFF;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+}
+
+/* Color picker row layout */
+.md-color-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.md-color-row .md-color-presets {
+  flex: 1;
+}
+
+.md-color-row .md-color-custom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 /* ============================================

@@ -32,7 +32,10 @@
     <!-- Panel: 翻译服务 -->
     <div class="md-tab-panel" id="panel-api" role="tabpanel">
       <div class="section-title">选择翻译服务商</div>
-      <div class="md-radio-cards" id="provider-cards"></div>
+      <div class="md-field">
+        <select id="provider-select"><option value="">请选择服务商</option></select>
+        <label>服务商</label>
+      </div>
 
       <div class="md-divider mt-24"></div>
 
@@ -77,13 +80,7 @@
 
     <!-- Panel: 显示设置 -->
     <div class="md-tab-panel" id="panel-display" role="tabpanel" hidden>
-      <div class="section-title">默认显示模式</div>
-      <div class="md-chip-group mb-16">
-        <button class="md-chip" data-display-mode="bilingual">双语对照</button>
-        <button class="md-chip" data-display-mode="target-only">仅译文</button>
-      </div>
-
-      <div class="section-title mt-24">译文样式</div>
+      <div class="section-title">译文样式</div>
       <div class="style-options md-card">
         <label class="md-checkbox mb-16">
           <input type="checkbox" id="style-bold">
@@ -96,11 +93,16 @@
           <span>下划线</span>
         </label>
 
-        <div class="flex-row gap-16 mb-16">
-          <span class="text-md">文字颜色</span>
-          <div class="md-color-input">
-            <input type="color" id="style-color" value="#666666">
-            <span class="md-color-value" id="style-color-value">#666666</span>
+        <div class="flex-row gap-16 mb-16" style="align-items:flex-start;">
+          <span class="text-md" style="padding-top:4px;">文字颜色</span>
+          <div style="flex:1;">
+            <div class="md-color-presets" id="color-presets"></div>
+            <div class="md-color-row mt-8">
+              <div class="md-color-custom">
+                <input type="color" id="style-color" value="#666666">
+                <span class="md-color-value" id="style-color-value">#666666</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -251,29 +253,13 @@
 
       <div class="md-divider"></div>
 
-      <div class="section-title mt-16">缓存设置</div>
-      <label class="md-switch mb-16">
+      <div class="section-title mt-16">翻译缓存</div>
+      <div class="section-desc">缓存翻译结果，避免重复调用 API</div>
+      <label class="md-switch">
         <span>启用翻译缓存</span>
         <input type="checkbox" id="cache-enabled" checked>
         <span class="track"><span class="thumb"></span></span>
       </label>
-
-      <div class="md-slider mb-16">
-        <span class="text-md">有效期 (小时)</span>
-        <input type="range" id="cache-ttl" min="1" max="720" value="72" step="1">
-        <span class="md-slider-value" id="cache-ttl-value">72h</span>
-      </div>
-
-      <div class="md-slider mb-16">
-        <span class="text-md">最大容量 (MB)</span>
-        <input type="range" id="cache-max-size" min="10" max="200" value="50" step="10">
-        <span class="md-slider-value" id="cache-max-value">50MB</span>
-      </div>
-
-      <div class="flex-row gap-16 mb-16">
-        <span class="text-md text-secondary" id="cache-stats">缓存大小: 加载中...</span>
-        <button class="md-btn md-btn--small md-btn--outlined" id="btn-clear-cache">清除缓存</button>
-      </div>
 
       <div class="md-divider mt-24"></div>
 

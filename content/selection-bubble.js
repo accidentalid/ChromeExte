@@ -12,6 +12,13 @@ const VT_SELECTION_BUBBLE = {
   _drag: { active: false, startX: 0, startY: 0, origTop: 0, origLeft: 0, moved: false },
 
   /**
+   * 更新设置引用
+   */
+  updateSettings(settings) {
+    this.settings = settings;
+  },
+
+  /**
    * 初始化
    */
   init() {
@@ -196,7 +203,10 @@ const VT_SELECTION_BUBBLE = {
     this.state = 'result';
     const cachedBadge = cached ? '<span class="vt-badge">已缓存</span>' : '';
 
-    const ttsSupported = typeof VT_TTS_MANAGER !== 'undefined' && VT_TTS_MANAGER.isSupported() && VT_TTS_MANAGER.settings.enabled;
+    const displayMode = this.settings?.display?.mode || 'bilingual';
+    const isTargetOnly = displayMode === 'target-only';
+
+    const ttsSupported = typeof VT_TTS_MANAGER !== 'undefined' && VT_TTS_MANAGER.isSupported() && (this.settings?.tts?.enabled !== false);
     const speakBtn = ttsSupported ? `
           <button class="vt-speak-btn" aria-label="朗读原文" title="朗读原文">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -209,6 +219,7 @@ const VT_SELECTION_BUBBLE = {
           <button class="vt-close-btn" aria-label="关闭">&times;</button>
         </div>
         <div class="vt-card-body">
+          ${!isTargetOnly ? `
           <div class="vt-source-section">
             <div class="vt-section-label-row">
               <div class="vt-section-label">原文</div>
@@ -217,6 +228,7 @@ const VT_SELECTION_BUBBLE = {
             <div class="vt-source-text">${this._escapeHtml(this.currentText)}</div>
           </div>
           <div class="vt-divider"></div>
+          ` : ''}
           <div class="vt-result-section">
             <div class="vt-section-label">译文</div>
             <div class="vt-result-text">${this._escapeHtml(text)}</div>

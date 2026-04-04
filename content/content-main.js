@@ -38,6 +38,7 @@
 
       // 初始化划词翻译气泡
       VT_SELECTION_BUBBLE.init();
+      VT_SELECTION_BUBBLE.updateSettings(currentSettings);
 
       // 初始化划词选中处理
       VT_SELECTION_HANDLER.init(VT_SELECTION_BUBBLE);
@@ -221,12 +222,20 @@
       VT_TTS_MANAGER.updateSettings(newSettings.tts);
     }
 
+    // 同步设置到划词气泡
+    VT_SELECTION_BUBBLE.updateSettings(newSettings);
+
     VT_SELECTION_HANDLER.setEnabled(newSettings.selectionTranslateEnabled !== false);
 
     if (newSettings.floatingBubble?.enabled === false) {
       VT_FLOATING_BUBBLE.hide();
     } else {
-      VT_FLOATING_BUBBLE.show();
+      // 如果气泡未初始化（启动时被禁用），先初始化
+      if (!VT_FLOATING_BUBBLE.host) {
+        VT_FLOATING_BUBBLE.init();
+      } else {
+        VT_FLOATING_BUBBLE.show();
+      }
     }
   }
 

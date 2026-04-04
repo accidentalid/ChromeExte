@@ -86,7 +86,7 @@
 
     <!-- 底部 -->
     <footer class="popup-footer">
-      <span class="text-sm text-secondary">v1.0.1</span>
+      <span class="text-sm text-secondary">v1.0.2</span>
       <span class="text-sm text-secondary" id="shortcut-hint">Alt+T 划词 · Alt+P 全页</span>
     </footer>
   </div>
@@ -118,7 +118,10 @@
       <!-- 翻译服务 -->
       <div class="settings-panel" id="s-api">
         <div class="sp-title">翻译服务商</div>
-        <div class="sp-providers" id="sp-provider-cards"></div>
+        <div class="md-field">
+          <select id="sp-provider-select"><option value="">请选择服务商</option></select>
+          <label>服务商</label>
+        </div>
         <div class="sp-divider"></div>
         <div id="sp-provider-config">
           <div class="sp-title" id="sp-provider-config-title">服务商配置</div>
@@ -150,6 +153,11 @@
 
       <!-- 显示设置 -->
       <div class="settings-panel" id="s-display" hidden>
+        <div class="sp-title">UI 主题</div>
+        <div class="theme-swatches" id="sp-theme-swatches"></div>
+
+        <div class="sp-divider"></div>
+
         <div class="sp-title">默认显示模式</div>
         <div class="md-chip-group mb-12">
           <button class="md-chip" data-sp-display-mode="bilingual">双语对照</button>
@@ -167,13 +175,6 @@
           <span class="check-box"></span>
           <span>下划线</span>
         </label>
-        <div class="sp-row mb-12">
-          <span>文字颜色</span>
-          <div class="md-color-input">
-            <input type="color" id="sp-style-color" value="#666666">
-            <span id="sp-style-color-value">#666666</span>
-          </div>
-        </div>
         <div class="sp-row mb-12">
           <span>字体大小</span>
           <div class="md-chip-group">
@@ -254,16 +255,13 @@
         </div>
 
         <div class="sp-divider"></div>
-        <div class="sp-title">缓存</div>
+        <div class="sp-title">翻译缓存</div>
+        <div class="sp-hint">缓存翻译结果，避免重复调用</div>
         <label class="md-switch mb-12">
-          <span>启用翻译缓存</span>
+          <span>启用缓存</span>
           <input type="checkbox" id="sp-cache-enabled" checked>
           <span class="track"><span class="thumb"></span></span>
         </label>
-        <div class="sp-row mb-12">
-          <span class="text-sm text-secondary" id="sp-cache-stats">缓存: 加载中...</span>
-          <button class="md-btn md-btn--small md-btn--outlined" id="sp-clear-cache">清除</button>
-        </div>
 
         <div class="sp-divider"></div>
         <div class="sp-title">配置</div>
